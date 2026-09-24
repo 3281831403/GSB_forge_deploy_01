@@ -1,0 +1,14 @@
+# Project choices recorded by `gombit new`. Runtime configuration is read
+# from the process environment (see .env.example), not this file.
+name: forge-control-plane
+module: github.com/gombit-dev/gombit-forge/controlplane
+database: postgres
+cache: memory
+# Bearer JWT is the v0.1 API default (C3). `--auth cookie` records HttpOnly
+# session cookies + CSRF; see docs/auth-cookie.md and .env.example for the
+# GOMBIT_AUTH_MODE / GOMBIT_COOKIE_* settings this wires.
+auth: cookie
+# Minimal/headless is the default (C4). `--ui mui` scaffolds the MUI CRUD
+# preset (ThemeProvider, AppBar, Table, TextField). See docs/frontend-mui.md.
+ui: minimal
+api_prefix: /api/v1

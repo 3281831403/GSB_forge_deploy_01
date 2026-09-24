@@ -1,0 +1,209 @@
+{
+  "spec_version": 1,
+  "project": {
+    "id": "prj_01K2M6RXQ8CJ10000000000000",
+    "name": "Acme CRM",
+    "slug": "acme-crm"
+  },
+  "database": {
+    "driver": "postgres"
+  },
+  "auth": {
+    "mode": "cookie"
+  },
+  "resources": [
+    {
+      "id": "res_01K2M6RXQ8CJ10000000000000",
+      "label": "Customer",
+      "label_plural": "Customers",
+      "code_name": "Customer",
+      "storage_name": "customers",
+      "fields": [
+        {
+          "id": "fld_01K2M6RXQ8CJ11000000000000",
+          "label": "Name",
+          "type": "string",
+          "code_name": "Name",
+          "storage_name": "name",
+          "required": true
+        },
+        {
+          "id": "fld_01K2M6RXQ8CJ12000000000000",
+          "label": "Email",
+          "type": "string",
+          "code_name": "Email",
+          "storage_name": "email",
+          "required": true,
+          "unique": true
+        },
+        {
+          "id": "fld_01K2M6RXQ8CJ13000000000000",
+          "label": "Active",
+          "type": "boolean",
+          "code_name": "Active",
+          "storage_name": "active",
+          "default": "true"
+        },
+        {
+          "id": "fld_01K2M6RXQ8CJ14000000000000",
+          "label": "Tier",
+          "type": "enum",
+          "code_name": "Tier",
+          "storage_name": "tier",
+          "enum_values": [
+            {
+              "value": "free",
+              "label": "Free"
+            },
+            {
+              "value": "pro",
+              "label": "Pro"
+            }
+          ]
+        }
+      ],
+      "behavior": {
+        "create_enabled": true,
+        "update_enabled": true,
+        "delete_enabled": true,
+        "admin_visible": true,
+        "list_fields": [
+          "fld_01K2M6RXQ8CJ11000000000000",
+          "fld_01K2M6RXQ8CJ12000000000000"
+        ],
+        "searchable_fields": [
+          "fld_01K2M6RXQ8CJ12000000000000"
+        ]
+      }
+    },
+    {
+      "id": "res_01K2M6RXQ8CJ20000000000000",
+      "label": "Invoice",
+      "label_plural": "Invoices",
+      "code_name": "Invoice",
+      "storage_name": "invoices",
+      "fields": [
+        {
+          "id": "fld_01K2M6RXQ8CJ21000000000000",
+          "label": "Customer",
+          "type": "belongs_to",
+          "code_name": "Customer",
+          "storage_name": "customer_id",
+          "required": true,
+          "target": "res_01K2M6RXQ8CJ10000000000000",
+          "inverse_label": "Invoices"
+        },
+        {
+          "id": "fld_01K2M6RXQ8CJ22000000000000",
+          "label": "Total",
+          "type": "decimal",
+          "code_name": "Total",
+          "storage_name": "total",
+          "required": true
+        },
+        {
+          "id": "fld_01K2M6RXQ8CJ23000000000000",
+          "label": "Paid",
+          "type": "boolean",
+          "code_name": "Paid",
+          "storage_name": "paid",
+          "default": "false"
+        },
+        {
+          "id": "fld_01K2M6RXQ8CJ24000000000000",
+          "label": "Due date",
+          "type": "date",
+          "code_name": "DueDate",
+          "storage_name": "due_date"
+        }
+      ],
+      "behavior": {
+        "create_enabled": true,
+        "update_enabled": true,
+        "delete_enabled": false,
+        "admin_visible": true,
+        "list_fields": [
+          "fld_01K2M6RXQ8CJ22000000000000",
+          "fld_01K2M6RXQ8CJ23000000000000"
+        ]
+      }
+    }
+  ],
+  "pages": [
+    {
+      "id": "pag_01K2M6RXQ8CJ31000000000000",
+      "slug": "dashboard",
+      "label": "Dashboard",
+      "type": "dashboard",
+      "dashboard": {
+        "count_cards": [
+          {
+            "label": "Customers",
+            "resource": "res_01K2M6RXQ8CJ10000000000000"
+          }
+        ],
+        "recent_lists": [
+          {
+            "label": "Recent invoices",
+            "resource": "res_01K2M6RXQ8CJ20000000000000",
+            "limit": 5
+          }
+        ]
+      }
+    },
+    {
+      "id": "pag_01K2M6RXQ8CJ32000000000000",
+      "slug": "customers",
+      "label": "Customers",
+      "type": "resource_table",
+      "resource": "res_01K2M6RXQ8CJ10000000000000",
+      "table": {
+        "title": "Customers",
+        "columns": [
+          "fld_01K2M6RXQ8CJ11000000000000",
+          "fld_01K2M6RXQ8CJ12000000000000"
+        ],
+        "search": true,
+        "page_size": 25
+      }
+    },
+    {
+      "id": "pag_01K2M6RXQ8CJ33000000000000",
+      "slug": "invoices",
+      "label": "Invoices",
+      "type": "resource_table",
+      "resource": "res_01K2M6RXQ8CJ20000000000000",
+      "table": {
+        "columns": [
+          "fld_01K2M6RXQ8CJ22000000000000",
+          "fld_01K2M6RXQ8CJ23000000000000"
+        ]
+      }
+    }
+  ],
+  "navigation": [
+    {
+      "id": "nav_01K2M6RXQ8CJ41000000000000",
+      "label": "Dashboard",
+      "target": "page",
+      "page": "pag_01K2M6RXQ8CJ31000000000000"
+    },
+    {
+      "id": "nav_01K2M6RXQ8CJ42000000000000",
+      "label": "Customers",
+      "target": "page",
+      "page": "pag_01K2M6RXQ8CJ32000000000000"
+    },
+    {
+      "id": "nav_01K2M6RXQ8CJ43000000000000",
+      "label": "Docs",
+      "target": "external",
+      "url": "https://example.com/docs"
+    }
+  ],
+  "branding": {
+    "app_name": "Acme CRM",
+    "accent_color": "#3366ff",
+    "appearance": "system"
+  }
+}
