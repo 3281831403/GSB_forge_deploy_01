@@ -111,6 +111,18 @@ func (s *Service) ExportSpec(ctx context.Context, userID uint, repoName string, 
 		return Result{}, fmt.Errorf("ghexport: create repository: %w", err)
 	}
 
+	// Push to and roll back the repo GitHub actually created, not the requested
+	// name: GitHub normalizes repo names (e.g. spaces to hyphens), so the two
+	// can differ, and targeting the requested name would push to a repo that
+	// does not exist (404) and leave the just-created one orphaned on rollback.
+	createdName := repo.Name
+	if createdName == "" {
+		createdName = repoNameFromFullName(repo.FullName)
+	}
+	if createdName == "" {
+		createdName = repoName
+	}
+
 	// From here the repo exists but is empty; on any failure roll it back so a
 	// retry with the same name isn't blocked by a leftover empty repo.
 	owner := repo.Owner.Login
@@ -122,7 +134,7 @@ func (s *Service) ExportSpec(ctx context.Context, userID uint, repoName string, 
 		Provenance: compiler.NewProvenance(s.gombitVersion, revisionRef),
 	})
 	if err != nil {
-		s.rollback(ctx, token, owner, repoName)
+		s.rollback(ctx, token, owner, createdName)
 		return Result{}, fmt.Errorf("ghexport: assemble source: %w", err)
 	}
 
@@ -130,12 +142,21 @@ func (s *Service) ExportSpec(ctx context.Context, userID uint, repoName string, 
 	if branch == "" {
 		branch = "main"
 	}
-	if err := s.pub.PushFiles(ctx, token, owner, repoName, branch, files, "Initial export from Gombit Forge"); err != nil {
-		s.rollback(ctx, token, owner, repoName)
+	if err := s.pub.PushFiles(ctx, token, owner, createdName, branch, files, "Initial export from Gombit Forge"); err != nil {
+		s.rollback(ctx, token, owner, createdName)
 		return Result{}, fmt.Errorf("ghexport: push source: %w", err)
 	}
 
 	return Result{RepoURL: repo.HTMLURL, FullName: repo.FullName}, nil
+}
+
+// repoNameFromFullName extracts the repo element of an "owner/repo" full name.
+// It is the fallback for a Publisher that reports only FullName.
+func repoNameFromFullName(fullName string) string {
+	if i := strings.LastIndex(fullName, "/"); i >= 0 {
+		return fullName[i+1:]
+	}
+	return ""
 }
 
 // rollback best-effort deletes a repo created earlier in a now-failed export, so

@@ -73,9 +73,22 @@ export function BuildTrigger({
       setAutoStatus(`Change detected (r${head}) — rebuilding when it settles…`);
       debounceTimer = setTimeout(() => {
         if (!active || head === lastBuilt) return;
-        lastBuilt = head;
         setAutoStatus(`Rebuilding r${head}…`);
-        void runBuild().then(() => active && setAutoStatus(`Watching for changes (last built r${head})…`));
+        void runBuild().then((jobID) => {
+          if (!active) return;
+          if (jobID != null) {
+            // Mark the revision built only once its build is really enqueued.
+            lastBuilt = head;
+            setAutoStatus(`Watching for changes (last built r${head})…`);
+          } else {
+            // The enqueue failed: leave lastBuilt untouched and re-arm the
+            // change detection so the next poll retries this revision instead
+            // of skipping it forever — and say so rather than claim a build
+            // that never happened.
+            lastSeen = null;
+            setAutoStatus(`Rebuild of r${head} failed — retrying when it settles…`);
+          }
+        });
       }, DEBOUNCE_MS);
     };
 
