@@ -60,6 +60,10 @@ type File struct {
 
 // Repo is the created repository, as much of it as callers need.
 type Repo struct {
+	// Name is the repository name GitHub actually created. It can differ from
+	// the requested name — GitHub normalizes names (e.g. spaces to hyphens) —
+	// so callers must push to and roll back Name, not their request.
+	Name          string `json:"name"`
 	FullName      string `json:"full_name"`
 	HTMLURL       string `json:"html_url"`
 	Owner         Owner  `json:"owner"`
